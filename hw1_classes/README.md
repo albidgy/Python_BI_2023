@@ -59,3 +59,7 @@ Implemented work with various acidsequences (DNA, RNA, Amino).
   - ```transcribe``` - an additional method returning the transcribed sequence.
 * AminoAcidSequence(AcidSequence)
   - ```translate``` - an additional method, which returns the amino acid sequence from a one-letter notation to a three-letter notation.
+
+Examples of the use and interaction of classes are presented in ```HW_1.ipynb```.
+  
+All modules required for installation are located in ```requirements.txt```.
