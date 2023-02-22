@@ -32,7 +32,7 @@ sum << Args([1, 2]) -> 3
 
 ### Task 3 - ```task3.py```
 
-A float inheritance class is made, which, when receiving attributes of the <action> _ <number> format, we get the result of such an action on our number.
+A float inheritance class is made, which, when receiving attributes of the \<function>_\<value> format, we get the result of such an action on our number.
 ```python3
 StrangeFloat(3.5).add_1 -> 4.5
 ```
