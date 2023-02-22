@@ -7,7 +7,7 @@ class BiologicalSequence(ABC):
         pass
 
     @abstractmethod
-    def do_slice(self):
+    def __getitem__(self):
         pass
 
     @abstractmethod
@@ -27,21 +27,21 @@ class AcidSequence(BiologicalSequence):
     def __len__(self):
         return len(self._sequence)
 
-    def do_slice(self, bounds):
-        if isinstance(bounds, int):
-            return self._sequence[bounds]
-        elif isinstance(bounds, tuple):
-            start, stop = bounds
-            return self._sequence[start:stop]
+    def __getitem__(self, idx):
+        return self._sequence.__getitem__(idx)
 
     def __str__(self):
         return str(self._sequence)
 
     def check_alphabet(self):
-        for nucl in self._sequence:
-            if nucl.upper() not in self._DICT_COMPLEMENT:
-                return False
-        return True
+        if self._DICT_COMPLEMENT is None:
+            raise NotImplementedError(
+                'Define check_alphabet in one of the following classes: %s.' % (type(self).__subclasses__()))
+        else:
+            for nucl in self._sequence:
+                if nucl.upper() not in self._DICT_COMPLEMENT:
+                    return False
+            return True
 
 
 class NucleicAcidSequence(AcidSequence):
@@ -49,10 +49,14 @@ class NucleicAcidSequence(AcidSequence):
         super().__init__(sequence)
 
     def complement(self):
-        complement_seq = []
-        for nucl in self._sequence:
-            complement_seq.append(self._DICT_COMPLEMENT[nucl])
-        return ''.join(complement_seq[::-1])
+        if self._DICT_COMPLEMENT is None:
+            raise NotImplementedError(
+                'Define complement in one of the following classes: %s.' % (type(self).__subclasses__()))
+        else:
+            complement_seq = []
+            for nucl in self._sequence:
+                complement_seq.append(self._DICT_COMPLEMENT[nucl])
+            return ''.join(complement_seq[::-1])
 
     def gc_content(self):
         gc_compound = 0
