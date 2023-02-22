@@ -43,7 +43,7 @@ Replaced in the source code the maximum possible number of syntactic constructio
 
 ### Task 5 - ```task5.py```
 
-Implemented work with various acidsequences (DNA, RNA, Amino).
+Implemented work with various acid sequences (DNA, RNA, Amino).
 
 * BiologicalSequence (abstract class)
   - working with the len function;
