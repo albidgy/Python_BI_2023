@@ -12,7 +12,7 @@ class FastaRecord:
 
 class OpenFasta:
     def __init__(self, file_name):
-        self._fasta_record = FastaRecord(seq=None, id_=None, description=None)
+        self._fasta_record = FastaRecord(seq='', id_='', description='')
         self.file_obj = open(file_name)
         self.__seq_l = []
 
@@ -33,20 +33,20 @@ class OpenFasta:
             line = line.strip('\n')
             if line.startswith('#'):
                 continue
-
+            
             elif line.startswith('>'):
-                if self._fasta_record.id_ is None:  # need for first line: >gene spesies
+                if self._fasta_record.id_ == '':  # need for first line: >gene spesies
                     self._fasta_record.id_, self._fasta_record.description = re.findall(r'(.+?) (.+)', line)[0]
                 else:
                     self._fasta_record.seq = ''.join(self.__seq_l)
                     # make object with current values
                     current_fasta_record = self._fasta_record
                     # clear current info
-                    self._fasta_record = FastaRecord(seq=None, id_=None, description=None)
+                    self._fasta_record = FastaRecord(seq='', id_='', description='')
                     # remember for next iteration
                     self._fasta_record.id_, self._fasta_record.description = re.findall(r'(.+?) (.+)', line)[0]
                     return current_fasta_record
-
+                
             else:
                 self.__seq_l.append(line)
 
