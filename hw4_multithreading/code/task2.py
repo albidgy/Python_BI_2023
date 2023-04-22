@@ -4,13 +4,14 @@ import time
 import warnings
 import threading
 import sys
+from typing import Union, Optional, Callable
 
 
 class ControlsMemoryUsage(threading.Thread):
     '''
     Takes into account the consumption of RAM when the program is running.
     '''
-    def __init__(self, soft_limit, hard_limit, poll_interval):
+    def __init__(self, soft_limit: Optional[Union[str, int]], hard_limit: Optional[Union[str, int]], poll_interval: Union[int, float]) -> None:
         '''
         :param str soft_limit: soft limit of memory usage. If the function exceeds this limit, warning is displayed (by default None)
         :param str hard_limit: hard memory usage limit. If the function exceeds this limit, return exception and the function ends (by default None)
@@ -22,23 +23,25 @@ class ControlsMemoryUsage(threading.Thread):
         self.poll_interval = poll_interval
 
     @staticmethod
-    def get_memory_usage():
+    def get_memory_usage() -> int:
         '''
         Shows the current memory consumption of the process.
 
-        :return: int usage memory in Bytes
+        :return: usage memory in Bytes
+        :rtype: int
         '''
         process = psutil.Process(os.getpid())
         mem_info = process.memory_info()
         return mem_info.rss
 
     @staticmethod
-    def bytes_to_human_readable(n_bytes):
+    def bytes_to_human_readable(n_bytes: int) -> str:
         '''
         Converts bytes to a human-readable record.
 
-        :param int or float n_bytes: number of bytes
-        :return: string format human-readable record
+        :param int n_bytes: number of bytes
+        :return: format human-readable record
+        :rtype: str
         '''
         symbols = ('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
         prefix = {}
@@ -51,16 +54,17 @@ class ControlsMemoryUsage(threading.Thread):
         return f"{n_bytes}B"
 
     @staticmethod
-    def human_readable_to_bytes(memory_as_str):
+    def human_readable_to_bytes(memory_as_str: str) -> Optional[int]:
         '''
         Converts human-readable used memory to bytes.
 
         :param str memory_as_str: human-readable record of memory
-        :return: float format bytes
+        :return: format bytes
+        :rtype: int or None
         '''
         if isinstance(memory_as_str, type(None)):
             return None
-        else:
+        elif isinstance(memory_as_str, str):
             symbols = ('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
             prefix = {}
             for idx, s in enumerate(symbols):
@@ -69,12 +73,13 @@ class ControlsMemoryUsage(threading.Thread):
             n_bytes = prefix[symb] * float(memory_as_str[:-1])
             return int(n_bytes)
 
-    def run(self):
+    def run(self) -> None:
         '''
         Run
         Starts the job of tracking RAM consumption.
 
         :return: None
+        :rtype: NoneType
         '''
         has_over_soft_limit = False
         while True:
@@ -90,7 +95,7 @@ class ControlsMemoryUsage(threading.Thread):
                 os._exit(1)
             time.sleep(self.poll_interval)
 
-def memory_limit(soft_limit, hard_limit, poll_interval):
+def memory_limit(soft_limit: str, hard_limit: str, poll_interval: Union[int, float]) -> Callable:
     '''
     Decorator for tracking RAM consumption of function.
 
@@ -98,8 +103,9 @@ def memory_limit(soft_limit, hard_limit, poll_interval):
     :param str hard_limit: hard memory usage limit. If the function exceeds this limit, return exception and the function ends (by default None)
     :param int or float poll_interval: time interval (in seconds) between memory usage checks
     :return: wrapped function with RAM usage
+    :rtype: Callable
     '''
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         def inner_func():
             control_memory = ControlsMemoryUsage(soft_limit, hard_limit, poll_interval)
             control_memory.start()
@@ -110,9 +116,12 @@ def memory_limit(soft_limit, hard_limit, poll_interval):
 
 
 @memory_limit(soft_limit='512M', hard_limit='1.5G', poll_interval=0.1)
-def memory_increment():
+def memory_increment() -> list:
     """
     Function for testing.
+
+    :return: list of numbers
+    :rtype: list
     """
     lst = []
     for i in range(50000000):

@@ -1,12 +1,17 @@
-import time
 import multiprocessing
+from typing import Union, Optional, Callable, List, Tuple, Dict, Any
+import time
 
 
 class ParallelRunning:
     '''
     Universal class for parallelization across processes.
     '''
-    def __init__(self, target_func, args_container=None, kwargs_container=None, n_jobs=None):
+    def __init__(self,
+                 target_func: Union[Callable, List[Callable]],
+                 args_container: Optional[Union[List[Tuple], Tuple]] = None,
+                 kwargs_container: Optional[List[Dict[str, Any]]] = None,
+                 n_jobs: int = None) -> None:
         '''
         :param function or list target_func: objective function or functions
         :param list or None args_container: container with positional arguments numbers or tuples (by default None)
@@ -58,12 +63,13 @@ class ParallelRunning:
         self._fill_empty_args_kwargs()
         self._n_jobs = min(self._n_jobs, len(self._args_container))
 
-    def _add_tasks_in_queue(self, queue):
+    def _add_tasks_in_queue(self, queue: multiprocessing.Queue) -> multiprocessing.Queue:
         '''
         Adds tasks to the queue.
 
-        :param queue: multiprocessing.Queue() object
+        :param multiprocessing.Queue queue: object multiprocessing.Queue
         :return: filled queue
+        :rtype: multiprocessing.Queue
         '''
         counter = 0
         for arg, kwarg in zip(self._args_container, self._kwargs_container):
@@ -71,14 +77,15 @@ class ParallelRunning:
             counter += 1
         return queue
 
-    def _process_tasks(self, func, queue, manager_dict):
+    def _process_tasks(self, func: Callable, queue: multiprocessing.Queue, manager_dict: multiprocessing.Manager) -> None:
         '''
         Handles tasks from the queue.
 
         :param function func: input target function
-        :param queue: filled queue
+        :param multiprocessing.Queue queue: filled queue
         :param dict manager_dict: multiprocessing.Manager object
         :return: None
+        :rtype: NoneType
         '''
         while not queue.empty():
             counter, args, kwargs = queue.get()
@@ -88,11 +95,12 @@ class ParallelRunning:
             manager_dict[counter] = call_func
         return None
 
-    def parallel_map(self):
+    def parallel_map(self) -> List[list]:
         '''
         Multiprocessing run of target function/functions.
 
-        :return: list of results
+        :return: list of strings results
+        :rtype: List[list]
         '''
         self._compare_containers_len()
         self._check_n_funcs()
@@ -116,15 +124,4 @@ class ParallelRunning:
                 interm_res.append(manager_dict[key])
             results.append(interm_res)
             interm_res = []
-        return '\n'.join(map(str, results))
-
-# def test_func(x=1, s=2, a=1, b=1, c=1):
-#     time.sleep(s)
-#     return a * x ** 2 + b * x + c
-
-# def test_func3():
-#     def inner_test_func(sleep_time):
-#         time.sleep(sleep_time)
-#     return ParallelRunning(inner_test_func, args_container=[1, 2, 3]).parallel_map()
-
-# test_func3()
+        return results
