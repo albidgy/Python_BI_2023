@@ -7,20 +7,39 @@ import sys
 
 
 class ControlsMemoryUsage(threading.Thread):
+    '''
+    Takes into account the consumption of RAM when the program is running.
+    '''
     def __init__(self, soft_limit, hard_limit, poll_interval):
+        '''
+        :param str soft_limit: soft limit of memory usage. If the function exceeds this limit, warning is displayed (by default None)
+        :param str hard_limit: hard memory usage limit. If the function exceeds this limit, return exception and the function ends (by default None)
+        :param int or float poll_interval: time interval (in seconds) between memory usage checks
+        '''
         super().__init__()
         self.soft_limit = self.human_readable_to_bytes(soft_limit)
         self.hard_limit = self.human_readable_to_bytes(hard_limit)
         self.poll_interval = poll_interval
 
     @staticmethod
-    def get_memory_usage():  # Показывает текущее потребление памяти процессом
+    def get_memory_usage():
+        '''
+        Shows the current memory consumption of the process.
+
+        :return: int usage memory in Bytes
+        '''
         process = psutil.Process(os.getpid())
         mem_info = process.memory_info()
         return mem_info.rss
 
     @staticmethod
     def bytes_to_human_readable(n_bytes):
+        '''
+        Converts bytes to a human-readable record.
+
+        :param int or float n_bytes: number of bytes
+        :return: string format human-readable record
+        '''
         symbols = ('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
         prefix = {}
         for idx, s in enumerate(symbols):
@@ -33,6 +52,12 @@ class ControlsMemoryUsage(threading.Thread):
 
     @staticmethod
     def human_readable_to_bytes(memory_as_str):
+        '''
+        Converts human-readable used memory to bytes.
+
+        :param str memory_as_str: human-readable record of memory
+        :return: float format bytes
+        '''
         if isinstance(memory_as_str, type(None)):
             return None
         else:
@@ -45,6 +70,12 @@ class ControlsMemoryUsage(threading.Thread):
             return int(n_bytes)
 
     def run(self):
+        '''
+        Run
+        Starts the job of tracking RAM consumption.
+
+        :return: None
+        '''
         has_over_soft_limit = False
         while True:
             cur_mem_info = self.get_memory_usage()
@@ -60,6 +91,14 @@ class ControlsMemoryUsage(threading.Thread):
             time.sleep(self.poll_interval)
 
 def memory_limit(soft_limit, hard_limit, poll_interval):
+    '''
+    Decorator for tracking RAM consumption of function.
+
+    :param str soft_limit: soft limit of memory usage. If the function exceeds this limit, warning is displayed (by default None)
+    :param str hard_limit: hard memory usage limit. If the function exceeds this limit, return exception and the function ends (by default None)
+    :param int or float poll_interval: time interval (in seconds) between memory usage checks
+    :return: wrapped function with RAM usage
+    '''
     def decorator(func):
         def inner_func():
             control_memory = ControlsMemoryUsage(soft_limit, hard_limit, poll_interval)
@@ -73,10 +112,7 @@ def memory_limit(soft_limit, hard_limit, poll_interval):
 @memory_limit(soft_limit='512M', hard_limit='1.5G', poll_interval=0.1)
 def memory_increment():
     """
-    Функция для тестирования
-
-    В течение нескольких секунд достигает использования памяти 1.89G
-    Потребление памяти и скорость накопления можно варьировать, изменяя код
+    Function for testing.
     """
     lst = []
     for i in range(50000000):
@@ -84,5 +120,3 @@ def memory_increment():
             time.sleep(0.1)
         lst.append(i)
     return lst
-
-# memory_increment()
