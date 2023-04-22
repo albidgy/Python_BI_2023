@@ -11,11 +11,11 @@ class ControlsMemoryUsage(threading.Thread):
     '''
     Takes into account the consumption of RAM when the program is running.
     '''
-    def __init__(self, soft_limit: Optional[Union[str, int]], hard_limit: Optional[Union[str, int]], poll_interval: Union[int, float]) -> None:
+    def __init__(self, soft_limit: Optional[Union[str, int]] = None, hard_limit: Optional[Union[str, int]] = None, poll_interval: Union[int, float] = 1) -> None:
         '''
         :param str soft_limit: soft limit of memory usage. If the function exceeds this limit, warning is displayed (by default None)
         :param str hard_limit: hard memory usage limit. If the function exceeds this limit, return exception and the function ends (by default None)
-        :param int or float poll_interval: time interval (in seconds) between memory usage checks
+        :param int or float poll_interval: time interval (in seconds) between memory usage checks (by default 1 second)
         '''
         super().__init__()
         self.soft_limit = self.human_readable_to_bytes(soft_limit)
